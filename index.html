@@ -423,86 +423,91 @@ function handleFetchError(err, loading, error) {
 }
 
 function renderProducts(products) {
-const productsContainer = document.getElementById('productsContainer');
-
-products.forEach((product, index) => {
-const productColumn = document.createElement('div');
-productColumn.className = 'col-lg-4 col-md-6 col-12';
-
-const productCard = document.createElement('div');
-productCard.className = 'single-feature wow fadeInUp';
-productCard.style.minHeight = '300px';
-productCard.setAttribute('data-wow-delay', `.${6 + (index * 2)}s`);
-
-// Icon (using Line Icons from the website)
-const productIcon = document.createElement('i');
-productIcon.className = getProductIcon(product);
-
-// Title
-const titleElement = document.createElement('h3');
-titleElement.textContent = product.name || 'Product';
-
-// Description
-const descriptionElement = document.createElement('p');
-descriptionElement.textContent = product.description || 'No description available';
-
-// Status Badge
-const statusBadge = createStatusBadge(product);
-
-// Price Element
-const priceElement = createPriceElement(product);
-
-// View Options Button
-const viewButton = createViewOptionsButton(product, index);
-viewButton.className = 'btn wow fadeInUp';
-viewButton.setAttribute('data-wow-delay', '.8s');
-
-// Assemble Product Card
-productCard.appendChild(productIcon);
-productCard.appendChild(titleElement);
-productCard.appendChild(descriptionElement);
-productCard.appendChild(statusBadge);
-productCard.appendChild(priceElement);
-productCard.appendChild(viewButton);
-
-productColumn.appendChild(productCard);
-productsContainer.appendChild(productColumn);
-});
+    const productsContainer = document.getElementById('productsContainer');
+    
+    products.forEach((product, index) => {
+        const productColumn = document.createElement('div');
+        productColumn.className = 'col-lg-4 col-md-6 col-12';
+        
+        const productCard = document.createElement('div');
+        productCard.className = 'single-feature wow fadeInUp';
+        productCard.style.minHeight = '300px';
+        productCard.setAttribute('data-wow-delay', `.${6 + (index * 2)}s`);
+        
+        // Icon (using Line Icons from the website)
+        const productIcon = document.createElement('i');
+        productIcon.className = getProductIcon(product);
+        
+        // Title
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = product.name || 'Product';
+        
+        // Description
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = product.description || product.name || 'No description available';
+        
+        // Status Badge (optional)
+        const statusElement = createStatusElement(product);
+        
+        // Assemble Product Card
+        productCard.appendChild(productIcon);
+        productCard.appendChild(titleElement);
+        productCard.appendChild(descriptionElement);
+        
+        // Add status if available
+        if (statusElement) {
+            productCard.appendChild(statusElement);
+        }
+        
+        productColumn.appendChild(productCard);
+        productsContainer.appendChild(productColumn);
+    });
 }
 
 // Function to select an appropriate icon based on product characteristics
 function getProductIcon(product) {
-const iconOptions = [
-'lni lni-shield', // Privacy/Security
-'lni lni-money-protection', // Affordable
-'lni lni-cog', // Quality
-'lni lni-lock-alt', // Secure
-'lni lni-bubble', // Support
-'lni lni-construction' // Updates
-];
-
-// Deterministically select an icon based on product name/ID
-const iconIndex = product.id
-? (parseInt(product.id) % iconOptions.length)
-: (Math.floor(Math.random() * iconOptions.length));
-
-return iconOptions[iconIndex];
+    const iconOptions = [
+        'lni lni-shield',       // Privacy/Security
+        'lni lni-money-protection', // Affordable
+        'lni lni-cog',          // Quality
+        'lni lni-lock-alt',     // Secure
+        'lni lni-bubble',       // Support
+        'lni lni-construction'  // Updates
+    ];
+    
+    // Deterministically select an icon based on product name/ID
+    const iconIndex = product.id 
+        ? (parseInt(product.id) % iconOptions.length) 
+        : (Math.floor(Math.random() * iconOptions.length));
+    
+    return iconOptions[iconIndex];
 }
 
-// Enhanced Status Badge (consistent with existing design)
-function createStatusBadge(product) {
-const statusBadge = document.createElement('span');
-const productStatus = product.status || STATUS.UNDETECTED;
+// Create a subtle status element if relevant
+function createStatusElement(product) {
+    // Only create status if there's a meaningful status to show
+    if (!product.status || product.status === STATUS.UNDETECTED) {
+        return null;
+    }
+    
+    const statusElement = document.createElement('div');
+    statusElement.style.marginTop = '10px';
+    statusElement.style.fontSize = '0.8em';
+    statusElement.style.color = getStatusColor(product.status);
+    statusElement.textContent = product.status;
+    
+    return statusElement;
+}
 
-statusBadge.className = `badge ${getStatusClass(productStatus)}`;
-statusBadge.style.display = 'inline-block';
-statusBadge.style.marginTop = '10px';
-statusBadge.style.padding = '5px 10px';
-statusBadge.style.borderRadius = '20px';
-statusBadge.style.fontSize = '0.8em';
-statusBadge.textContent = productStatus;
-
-return statusBadge;
+// Get color based on status
+function getStatusColor(status) {
+    switch(status) {
+        case STATUS.UNDETECTED: return '#28a745';
+        case STATUS.USE_AT_RISK: return '#ffc107';
+        case STATUS.DETECTED: return '#dc3545';
+        case STATUS.NOT_WORKING: return '#6c757d';
+        default: return '#000';
+    }
 }
 
 // Price Element with consistent styling
