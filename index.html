@@ -427,38 +427,61 @@ function renderProducts(products) {
     
     products.forEach((product, index) => {
         const productColumn = document.createElement('div');
-        productColumn.className = 'col-lg-4 col-md-6 col-12';
+        productColumn.className = 'col-lg-3 col-md-6 col-12';
+        productColumn.style.padding = '0.5%';
         
         const productCard = document.createElement('div');
-        productCard.className = 'single-feature wow fadeInUp';
-        productCard.style.minHeight = '300px';
+        productCard.className = 'single-table wow fadeInUp';
         productCard.setAttribute('data-wow-delay', `.${6 + (index * 2)}s`);
         
-        // Icon (using Line Icons from the website)
-        const productIcon = document.createElement('i');
-        productIcon.className = getProductIcon(product);
+        // Table Head
+        const tableHead = document.createElement('div');
+        tableHead.className = 'table-head';
         
         // Title
-        const titleElement = document.createElement('h3');
+        const titleElement = document.createElement('h4');
+        titleElement.className = 'title';
         titleElement.textContent = product.name || 'Product';
         
         // Description
         const descriptionElement = document.createElement('p');
-        descriptionElement.textContent = product.description || product.name || 'No description available';
+        descriptionElement.textContent = product.description || 'No description available';
         
-        // Status Badge (optional)
-        const statusElement = createStatusElement(product);
+        // Price Section
+        const priceContainer = document.createElement('div');
+        priceContainer.className = 'price';
         
-        // Assemble Product Card
-        productCard.appendChild(productIcon);
-        productCard.appendChild(titleElement);
-        productCard.appendChild(descriptionElement);
+        const priceElement = document.createElement('h2');
+        priceElement.className = 'amount';
         
-        // Add status if available
-        if (statusElement) {
-            productCard.appendChild(statusElement);
+        // Determine pricing
+        const variants = product.variants || [];
+        if (variants.length > 0) {
+            const minPrice = Math.min(...variants.map(v => v.price || 0));
+            priceElement.innerHTML = `$${minPrice.toFixed(2)}<span class="duration">/week</span>`;
+        } else {
+            priceElement.innerHTML = 'Price Unavailable';
         }
         
+        // Button Container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'button';
+        
+        // Buy Now Button
+        const buyButton = document.createElement('button');
+        buyButton.className = 'btn view-options';
+        buyButton.textContent = 'Buy Now!';
+        buyButton.setAttribute('data-product-id', product.id || (index + 1));
+        
+        // Assemble the product card
+        tableHead.appendChild(titleElement);
+        tableHead.appendChild(descriptionElement);
+        tableHead.appendChild(priceContainer);
+        priceContainer.appendChild(priceElement);
+        tableHead.appendChild(buttonContainer);
+        buttonContainer.appendChild(buyButton);
+        
+        productCard.appendChild(tableHead);
         productColumn.appendChild(productCard);
         productsContainer.appendChild(productColumn);
     });
