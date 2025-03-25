@@ -316,8 +316,7 @@
   <script src="https://cdn.sell.app/embed/script.js" type="module"></script>
 
   <script>
-  
-    // Configuration Constants
+// Configuration Constants
 const SELLAUTH_CONFIG = {
     SHOP_ID: 136111, // Your existing Shop ID
     API_KEY: '4986520|GSRAR3KgiYHKZXvyIOs4BSsYGAOWpT5OGF1ddF4Hce651e03', // Your existing API Key
@@ -334,15 +333,16 @@ const STATUS = {
 
 // Utility Functions
 function getStatusClass(status) {
-    switch(status) {
-        case STATUS.UNDETECTED: return 'status-undetected';
-        case STATUS.USE_AT_RISK: return 'status-risk';
-        case STATUS.DETECTED: return 'status-detected';
-        default: return 'status-not-working';
-    }
+    const statusClasses = {
+        [STATUS.UNDETECTED]: 'status-undetected',
+        [STATUS.USE_AT_RISK]: 'status-risk',
+        [STATUS.DETECTED]: 'status-detected',
+        [STATUS.NOT_WORKING]: 'status-not-working'
+    };
+    return statusClasses[status] || 'status-not-working';
 }
 
-// Fetch and Render Products
+// Fetch Products from SellAuth API
 async function fetchShopProducts() {
     const loading = document.getElementById('loading');
     const error = document.getElementById('error');
@@ -367,107 +367,160 @@ async function fetchShopProducts() {
             }
         );
         
-        // Log the raw response for debugging
-        const responseData = await response.json();
-        console.log('Raw API Response:', responseData);
-        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        // Determine the correct path to products
-        const products = responseData.products ||
-            responseData.data ||
-            responseData.items ||
-            responseData;
-        
-        // Validate products
-        if (!Array.isArray(products)) {
-            throw new Error('No products found in the response');
-        }
+        const responseData = await response.json();
+        const products = extractProducts(responseData);
         
         renderProducts(products);
+        createProductModals(products);
+        attachModalHandlers();
+        
         loading.classList.add('hidden');
     } catch (err) {
-        loading.classList.add('hidden');
-        error.textContent = `Error loading products: ${err.message}`;
-        error.classList.remove('hidden');
-        console.error('Fetch error:', err);
+        handleFetchError(err, loading, error);
     }
 }
 
-// Render Products to the Page
+// Extract Products from Response
+function extractProducts(responseData) {
+    // Try multiple potential paths for products
+    const productPaths = [
+        'products',
+        'data',
+        'items',
+        // If the response is directly the array of products
+        responseData
+    ];
+
+    for (let path of productPaths) {
+        const products = path === responseData ? path : responseData[path];
+        if (Array.isArray(products)) {
+            return products;
+        }
+    }
+
+    throw new Error('No products found in the response');
+}
+
+// Handle Fetch Errors
+function handleFetchError(err, loading, error) {
+    loading.classList.add('hidden');
+    error.textContent = `Error loading products: ${err.message}`;
+    error.classList.remove('hidden');
+    console.error('Fetch error:', err);
+}
+
+// Render Products
 function renderProducts(products) {
     const productsContainer = document.getElementById('productsContainer');
     
     products.forEach((product, index) => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.setAttribute('data-product-id', product.id || (index + 1));
-        
-        // Product Image
-        const productImage = document.createElement('div');
-        productImage.className = 'product-image';
-        const placeholderImg = document.createElement('img');
-        placeholderImg.src = `/api/placeholder/400/320`;
-        placeholderImg.alt = product.name || 'Product Image';
-        productImage.appendChild(placeholderImg);
-        
-        // Product Details
-        const productDetails = document.createElement('div');
-        productDetails.className = 'product-details';
-        
-        // Title
-        const titleElement = document.createElement('h3');
-        titleElement.className = 'product-title';
-        titleElement.textContent = product.name || 'Unnamed Product';
-        
-        // Stock Badge
-        const stockBadge = document.createElement('div');
-        stockBadge.className = 'stock-badge';
-        stockBadge.textContent = 'In Stock';
-        
-        // Status Badge
-        const statusBadge = document.createElement('span');
-        const productStatus = product.status || STATUS.UNDETECTED;
-        statusBadge.className = `status-badge ${getStatusClass(productStatus)}`;
-        statusBadge.textContent = productStatus;
-        
-        // Price
-        const priceElement = document.createElement('p');
-        priceElement.className = 'price';
-        const variants = product.variants || [];
-        const minPrice = variants.length > 0
-            ? Math.min(...variants.map(v => v.price || 0))
-            : 0;
-        const maxPrice = variants.length > 0
-            ? Math.max(...variants.map(v => v.price || 0))
-            : 0;
-        priceElement.textContent = variants.length > 0
-            ? `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`
-            : 'Price Not Available';
-        
-        // View Options Button
-        const viewButton = document.createElement('button');
-        viewButton.className = 'view-options';
-        viewButton.setAttribute('data-product-id', product.id || (index + 1));
-        viewButton.textContent = 'View Options';
-        
-        // Assemble Product Card
-        productDetails.appendChild(titleElement);
-        productDetails.appendChild(stockBadge);
-        productDetails.appendChild(statusBadge);
-        productDetails.appendChild(priceElement);
-        productDetails.appendChild(viewButton);
-        
-        productCard.appendChild(productImage);
-        productCard.appendChild(productDetails);
-        
+        const productCard = createProductCard(product, index);
         productsContainer.appendChild(productCard);
     });
+}
+
+// Create Product Card
+function createProductCard(product, index) {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-card';
+    productCard.setAttribute('data-product-id', product.id || (index + 1));
     
-    // Create modals for the products
-    createProductModals(products);
+    // Product Image
+    const productImage = createProductImage(product);
+    
+    // Product Details
+    const productDetails = createProductDetails(product, index);
+    
+    productCard.appendChild(productImage);
+    productCard.appendChild(productDetails);
+    
+    return productCard;
+}
+
+// Create Product Image
+function createProductImage(product) {
+    const productImage = document.createElement('div');
+    productImage.className = 'product-image';
+    const placeholderImg = document.createElement('img');
+    placeholderImg.src = `/api/placeholder/400/320`;
+    placeholderImg.alt = product.name || 'Product Image';
+    productImage.appendChild(placeholderImg);
+    return productImage;
+}
+
+// Create Product Details
+function createProductDetails(product, index) {
+    const productDetails = document.createElement('div');
+    productDetails.className = 'product-details';
+    
+    // Title
+    const titleElement = document.createElement('h3');
+    titleElement.className = 'product-title';
+    titleElement.textContent = product.name || 'Unnamed Product';
+    
+    // Stock Badge
+    const stockBadge = document.createElement('div');
+    stockBadge.className = 'stock-badge';
+    stockBadge.textContent = 'In Stock';
+    
+    // Status Badge
+    const statusBadge = createStatusBadge(product);
+    
+    // Price
+    const priceElement = createPriceElement(product);
+    
+    // View Options Button
+    const viewButton = createViewOptionsButton(product, index);
+    
+    // Assemble Product Details
+    productDetails.appendChild(titleElement);
+    productDetails.appendChild(stockBadge);
+    productDetails.appendChild(statusBadge);
+    productDetails.appendChild(priceElement);
+    productDetails.appendChild(viewButton);
+    
+    return productDetails;
+}
+
+// Create Status Badge
+function createStatusBadge(product) {
+    const statusBadge = document.createElement('span');
+    const productStatus = product.status || STATUS.UNDETECTED;
+    statusBadge.className = `status-badge ${getStatusClass(productStatus)}`;
+    statusBadge.textContent = productStatus;
+    return statusBadge;
+}
+
+// Create Price Element
+function createPriceElement(product) {
+    const priceElement = document.createElement('p');
+    priceElement.className = 'price';
+    
+    const variants = product.variants || [];
+    const prices = variants.map(v => v.price || 0);
+    
+    if (prices.length > 0) {
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        priceElement.textContent = `$${minPrice.toFixed(2)} - $${maxPrice.toFixed(2)}`;
+    } else {
+        priceElement.textContent = 'Price Not Available';
+    }
+    
+    return priceElement;
+}
+
+// Create View Options Button
+function createViewOptionsButton(product, index) {
+    const viewButton = document.createElement('button');
+    viewButton.className = 'view-options';
+    viewButton.setAttribute('data-product-id', product.id || (index + 1));
+    viewButton.textContent = 'View Options';
+    return viewButton;
 }
 
 // Create Product Modals (same as previous implementation)
