@@ -199,7 +199,9 @@
       </div>
     </div>
   </section>
-  <section id="pricing" class="pricing-table section">
+
+
+ <section id="pricing" class="pricing-table section">
     <div class="container">
       <div class="row">
         <div class="col-12">
@@ -210,93 +212,18 @@
           </div>
         </div>
       </div>
-      <div class="row">
-        <div class="horizontal-center">
-          <div class="col-lg-3 col-md-6 col-12" style="padding: 0.5%;">
-            <div class="single-table wow fadeInUp" data-wow-delay=".6s">
-              <div class="table-head">
-                <h4 class="title">daily <span style="font-size: 60%;"> (24 hours)</span></h4>
-                <p>Great for trying out Airflow or if you're on a budget.</p>
-                <div class="price">
-                  <h2 class="amount">$2<span class="duration">/week</span></h2>
-                </div>
-                <div class="button">
-                  <button class="btn" data-sell-store="40576" data-sell-product="211882" data-sell-theme=""
-                    data-sell-darkmode="true">
-                    Buy now!
-                  </button>
-
-                </div>
-              </div>
-              <div class="table-content">
-                <h4 class="middle-title">What's Included</h4>
-                <ul class="table-list">
-                  <li><i class="lni lni-checkmark-circle"></i> Premium Support</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Frequent Updates</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Advanced internal</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Undetected</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-6 col-12" style="padding: 0.5%;">
-            <div class="single-table wow fadeInUp" data-wow-delay=".8s">
-              <div class="table-head">
-                <h4 class="title">Weekly <span style="font-size: 60%;">(7 Days)</span></h4>
-                <p>Great for trying out Airflow or if you're on a budget.</p>
-                <div class="price">
-                  <h2 class="amount">$3<span class="duration">/we</span></h2>
-                </div>
-                <div class="button">
-                  <button class="btn" data-sell-store="40576" data-sell-product="211891" data-sell-theme=""
-                    data-sell-darkmode="true">
-                    Buy now!
-                  </button>
-                </div>
-              </div>
-              <div class="table-content">
-                <h4 class="middle-title">What's Included</h4>
-                <ul class="table-list">
-                  <li><i class="lni lni-checkmark-circle"></i> Premium Support</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Frequent Updates</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Advanced Internal</li>
-                  <li><i class="lni lni-checkmark-circle"></i> Undetected</li>
-                </ul>
-              </div>
-            </div>
+      <div class="row" id="productContainer">
+        <!-- Products will be dynamically loaded here -->
+        <div class="horizontal-center" id="productLoader">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="horizontal-center">
-      <div class="col-lg-3 col-md-6 col-12" style="padding: 0.5%;">
-        <div class="single-table wow fadeInUp" data-wow-delay=".6s">
-          <div class="table-head">
-            <h4 class="title">Monthly <span style="font-size: 60%;"> (30 days)</span></h4>
-            <p>Great for trying out Airflow or if you're on a budget.</p>
-            <div class="price">
-              <h2 class="amount">$6<span class="duration">/mo</span></h2>
-            </div>
-            <div class="button">
-              <button class="btn" data-sell-store="40576" data-sell-product="211892" data-sell-theme=""
-                data-sell-darkmode="true">
-                Buy now!
-              </button>
-
-            </div>
-          </div>
-          <div class="table-content">
-            <h4 class="middle-title">What's Included</h4>
-            <ul class="table-list">
-              <li><i class="lni lni-checkmark-circle"></i> Premium Support</li>
-              <li><i class="lni lni-checkmark-circle"></i> Frequent Updates</li>
-              <li><i class="lni lni-checkmark-circle"></i> Advanced internal</li>
-              <li><i class="lni lni-checkmark-circle"></i> Undetected</li>
-            </ul>
-          </div>
-        </div>
-      </div>
   </section>
+
+
   <section class="section call-action">
     <div class="container">
       <div class="row">
@@ -403,6 +330,7 @@
   <script src="assets/js/wow.min.js"></script>
   <script src="assets/js/count-up.min.js"></script>
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/product-loader.js"></script>
 </body>
 
 </html>
